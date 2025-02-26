@@ -1,1 +1,3 @@
 /target
+/modprobe/mod.ko
+Cargo.lock

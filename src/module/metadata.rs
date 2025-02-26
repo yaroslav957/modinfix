@@ -1,44 +1,16 @@
-use goblin::elf::Elf;
-use goblin::error::Result;
-use std::fs;
-use std::path::{Path, PathBuf};
+use goblin::{elf::Elf, error::Result};
+use std::{fs, path::Path};
 
 pub struct Metadata {
-    pub path: PathBuf,
-    pub retpoline: bool,
-    pub src_check_sum: u128,
-    pub module_info: ModuleInfo,
-}
-
-struct ModuleInfo(String);
-
-impl ModuleInfo {
-    fn new(section_data: &[u8]) -> Self {
-        ModuleInfo(
-            std::str::from_utf8(section_data)
-                .unwrap_or_default()
-                .into(),
-        )
-    }
-    
-    pub fn license(&self) -> String {
-        "hui".to_string()
-    }
-    
-    // опшны так как в sextion_data может не быть поля
-    pub fn author(&self) -> Option<String> {
-        Some("hui".to_string())
-    }
-    pub fn desctiption(&self) -> Option<String> {
-        Some("hui".to_string())
-    }
-    pub fn version(&self) -> Option<String> {
-        Some("hui".to_string())
-    }
+    pub comment_sec: Comment,
+    pub mod_info_sec: ModInfo,
+    pub debug_str_sec: DebugStr,
+    pub kernel_notes_sec: KernelNotes,
+    pub debug_line_str_sec: DebugLine,
 }
 
 impl Metadata {
-    fn parse(str: String) -> () {
+    fn parse(&self) -> () {
         ()
     }
 
@@ -58,5 +30,54 @@ impl Metadata {
         // parse section_data later - parse()
 
         Self { path }
+    }
+}
+
+#[doc = ".debug_line_str"]
+#[repr(transparent)]
+struct DebugLine(String);
+
+impl DebugLine {
+    pub(crate) fn new(section_data: &[u8]) -> Self {
+        DebugLine(std::str::from_utf8(section_data).unwrap_or_default().into())
+    }
+}
+
+#[doc = ".debug_str"]
+#[repr(transparent)]
+struct DebugStr(String);
+
+impl DebugStr {
+    pub(crate) fn new(section_data: &[u8]) -> Self {
+        DebugStr(std::str::from_utf8(section_data).unwrap_or_default().into())
+    }
+}
+
+#[doc = ".comment"]
+#[repr(transparent)]
+struct Comment(String);
+
+impl Comment {
+    pub(crate) fn new(section_data: &[u8]) -> Self {
+        Comment(std::str::from_utf8(section_data).unwrap_or_default().into())
+    }
+}
+
+#[doc = ".note.Linux"]
+#[repr(transparent)]
+struct KernelNotes(String);
+
+impl KernelNotes {
+    pub(crate) fn new(section_data: &[u8]) -> Self {
+        KernelNotes(std::str::from_utf8(section_data).unwrap_or_default().into())
+    }
+}
+
+#[doc = ".modinfo"]
+struct ModInfo(String);
+
+impl ModInfo {
+    pub(crate) fn new(section_data: &[u8]) -> Self {
+        ModInfo(std::str::from_utf8(section_data).unwrap_or_default().into())
     }
 }
