@@ -10,32 +10,48 @@ pub struct Metadata {
 }
 
 impl Metadata {
-    fn parse(&self) -> () {
-        ()
-    }
+    fn parse(&self) {}
 
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
         let mod_data = fs::read(path)?;
         let elf = Elf::parse(&mod_data)?;
-        let section_data = String::new();
 
-        for section in elf.section_headers {
-            if elf.shdr_strtab.get_at(section.sh_name) == Some(".modinfo") {
+        let mut modinfo_data: &[u8] = &[];
+        let mut kernel_notes_data: &[u8] = &[];
+        let mut comment_data: &[u8] = &[];
+        let mut debug_str_data: &[u8] = &[];
+        let mut debug_line_str_data: &[u8] = &[];
+
+        elf.section_headers
+            .iter()
+            .filter_map(|section| {
+                let name = elf.shdr_strtab.get_at(section.sh_name)?;
                 let data = &mod_data
                     [section.sh_offset as usize..(section.sh_offset + section.sh_size) as usize];
-                section_data = std::string::String::from_utf8(data.to_vec()).unwrap_or_default();
-            }
-        }
+                Some((name, data))
+            })
+            .for_each(|(name, data)| match name {
+                ".modinfo" => modinfo_data = data,
+                ".note.Linux" => kernel_notes_data = data,
+                ".comment" => comment_data = data,
+                ".debug_str" => debug_str_data = data,
+                ".debug_line_str" => debug_line_str_data = data,
+                _ => (), // until more sections
+            });
 
-        // parse section_data later - parse()
-
-        Self { path }
+        Ok(Self {
+            comment_sec: Comment::new(comment_data),
+            mod_info_sec: ModInfo::new(modinfo_data),
+            debug_str_sec: DebugStr::new(debug_str_data),
+            kernel_notes_sec: KernelNotes::new(kernel_notes_data),
+            debug_line_str_sec: DebugLine::new(debug_line_str_data),
+        })
     }
 }
 
 #[doc = ".debug_line_str"]
 #[repr(transparent)]
-struct DebugLine(String);
+pub struct DebugLine(String);
 
 impl DebugLine {
     pub(crate) fn new(section_data: &[u8]) -> Self {
@@ -45,7 +61,7 @@ impl DebugLine {
 
 #[doc = ".debug_str"]
 #[repr(transparent)]
-struct DebugStr(String);
+pub struct DebugStr(String);
 
 impl DebugStr {
     pub(crate) fn new(section_data: &[u8]) -> Self {
@@ -55,7 +71,7 @@ impl DebugStr {
 
 #[doc = ".comment"]
 #[repr(transparent)]
-struct Comment(String);
+pub struct Comment(String);
 
 impl Comment {
     pub(crate) fn new(section_data: &[u8]) -> Self {
@@ -65,7 +81,7 @@ impl Comment {
 
 #[doc = ".note.Linux"]
 #[repr(transparent)]
-struct KernelNotes(String);
+pub struct KernelNotes(String);
 
 impl KernelNotes {
     pub(crate) fn new(section_data: &[u8]) -> Self {
@@ -74,7 +90,8 @@ impl KernelNotes {
 }
 
 #[doc = ".modinfo"]
-struct ModInfo(String);
+#[repr(transparent)]
+pub struct ModInfo(String);
 
 impl ModInfo {
     pub(crate) fn new(section_data: &[u8]) -> Self {
