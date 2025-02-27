@@ -6,15 +6,15 @@ use crate::module::{metadata::Metadata, params::Params};
 pub mod metadata;
 pub mod params;
 
-pub struct Module<'m, Fd: Into<RawFd>> {
+pub struct Module {
     // cock_ed
-    pub fd: Fd,
+    pub fd: RawFd,
     pub flags: (LoadFlag, UnloadFlag),
     pub path: PathBuf,
     // fifty-fifty cock_ed
     pub metadata: Metadata,
     // non-cock_ed
-    pub params: Params<'m>, // <-- переделать это как врапер над стрингой
+    pub params: Params,
 }
 
 #[repr(u32)]
