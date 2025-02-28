@@ -109,9 +109,9 @@ impl KernelNotes {
         KernelNotes(
             std::str::from_utf8(section_data)
                 .unwrap_or_default()
-                .replace('\0', " ")
-                .trim()
-                .into(),
+                .chars()
+                .filter(|c| !c.is_control())
+                .collect::<String>(),
         )
     }
 }

@@ -1,6 +1,7 @@
 use std::{ffi::CString, io::Error};
 
 #[repr(transparent)]
+#[derive(Debug, Clone, Default)]
 pub struct Params(CString);
 
 impl Params {
