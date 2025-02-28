@@ -1,6 +1,7 @@
 use goblin::{elf::Elf, error::Result};
 use std::{fs, path::Path};
 
+#[derive(Debug, Clone)]
 pub struct Metadata {
     pub comment_sec: Comment,
     pub mod_info_sec: ModInfo,
@@ -48,51 +49,86 @@ impl Metadata {
 }
 
 #[doc = ".debug_line_str"]
+#[derive(Debug, Clone)]
 #[repr(transparent)]
 pub struct DebugLine(String);
 
 impl DebugLine {
     pub(crate) fn new(section_data: &[u8]) -> Self {
-        DebugLine(std::str::from_utf8(section_data).unwrap_or_default().into())
+        DebugLine(
+            std::str::from_utf8(section_data)
+                .unwrap_or_default()
+                .replace('\0', " ")
+                .trim()
+                .into(),
+        )
     }
 }
 
 #[doc = ".debug_str"]
+#[derive(Debug, Clone)]
 #[repr(transparent)]
 pub struct DebugStr(String);
 
 impl DebugStr {
     pub(crate) fn new(section_data: &[u8]) -> Self {
-        DebugStr(std::str::from_utf8(section_data).unwrap_or_default().into())
+        DebugStr(
+            std::str::from_utf8(section_data)
+                .unwrap_or_default()
+                .replace('\0', " ")
+                .trim()
+                .into(),
+        )
     }
 }
 
 #[doc = ".comment"]
+#[derive(Debug, Clone)]
 #[repr(transparent)]
 pub struct Comment(String);
 
 impl Comment {
     pub(crate) fn new(section_data: &[u8]) -> Self {
-        Comment(std::str::from_utf8(section_data).unwrap_or_default().into())
+        Comment(
+            std::str::from_utf8(section_data)
+                .unwrap_or_default()
+                .replace('\0', " ")
+                .trim()
+                .into(),
+        )
     }
 }
 
 #[doc = ".note.Linux"]
+#[derive(Debug, Clone)]
 #[repr(transparent)]
 pub struct KernelNotes(String);
 
 impl KernelNotes {
     pub(crate) fn new(section_data: &[u8]) -> Self {
-        KernelNotes(std::str::from_utf8(section_data).unwrap_or_default().into())
+        KernelNotes(
+            std::str::from_utf8(section_data)
+                .unwrap_or_default()
+                .replace('\0', " ")
+                .trim()
+                .into(),
+        )
     }
 }
 
 #[doc = ".modinfo"]
+#[derive(Debug, Clone)]
 #[repr(transparent)]
 pub struct ModInfo(String);
 
 impl ModInfo {
     pub(crate) fn new(section_data: &[u8]) -> Self {
-        ModInfo(std::str::from_utf8(section_data).unwrap_or_default().into())
+        ModInfo(
+            std::str::from_utf8(section_data)
+                .unwrap_or_default()
+                .replace('\0', " ")
+                .trim()
+                .into(),
+        )
     }
 }
