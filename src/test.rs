@@ -5,7 +5,7 @@ mod tests {
     #[test]
     fn test() {
         let _ = dbg!(Metadata::new(
-            "/home/yaroslav/Проекты/modinfix/modprobe/mod.ko"
+            "..modprobe/mod.ko"
         ));
     }
 }

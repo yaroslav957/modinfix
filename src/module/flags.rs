@@ -2,12 +2,13 @@ use libc::{MODULE_INIT_IGNORE_MODVERSIONS, MODULE_INIT_IGNORE_VERMAGIC, O_NONBLO
 
 #[repr(u32)]
 #[derive(Default)]
+/// Flags controlling module loading behavior
 pub enum LoadFlag {
     #[default]
     None = 0x0,
-    /// Allows load module even if it version does not match the kernel's expectation
+    /// Allows loading the module even if its version doesn't match the kernel's expectation
     IgnoreModuleVersion = MODULE_INIT_IGNORE_MODVERSIONS,
-    /// Allows load module compiled for different kernel versions
+    /// Allows loading modules compiled for different kernel versions
     IgnoreVersionMagic = MODULE_INIT_IGNORE_VERMAGIC,
     /// Combines the effects of `IgnoreModuleVersion` and `IgnoreVersionMagic`
     IgnoreAll = MODULE_INIT_IGNORE_MODVERSIONS | MODULE_INIT_IGNORE_VERMAGIC,
@@ -15,13 +16,15 @@ pub enum LoadFlag {
 
 #[repr(i32)]
 #[derive(Default)]
+/// Flags controlling the behavior of module unloading
 pub enum UnloadFlag {
     #[default]
+    /// No flags set
     None = 0x0,
-    /// The module is unloaded even if it lacks an exit function
+    /// Forces unloading of the module even if other modules depend on it
     Truncate = O_TRUNC,
-    /// If the module is in use, returns an error
+    /// Does not block if the module is in use and returns an error instead
     NonBlocking = O_NONBLOCK,
-    /// The module is unloaded immediately, even if it is in use
+    /// Combines the effects of `Truncate` and `NonBlocking`
     Both = O_TRUNC | O_NONBLOCK,
 }

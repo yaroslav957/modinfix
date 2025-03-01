@@ -2,9 +2,9 @@ use std::path::PathBuf;
 
 use crate::module::{metadata::Metadata, params::Params};
 
+pub mod flags;
 pub mod metadata;
 pub mod params;
-pub mod flags;
 
 pub struct Module {
     pub fd: i32,
