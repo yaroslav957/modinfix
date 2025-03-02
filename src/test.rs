@@ -4,8 +4,6 @@ mod tests {
 
     #[test]
     fn test() {
-        let _ = dbg!(Metadata::new(
-            "..modprobe/mod.ko"
-        ));
+        let _ = dbg!(Metadata::new("..modprobe/mod.ko"));
     }
 }
