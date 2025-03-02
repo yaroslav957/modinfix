@@ -1,9 +1,16 @@
 #[cfg(test)]
 mod tests {
-    use crate::module::metadata::Metadata;
+    use crate::module::{Module, metadata::ElfMetadata};
 
     #[test]
-    fn test() {
-        let _ = dbg!(Metadata::new("..modprobe/mod.ko"));
+    fn get_metadata() {
+        /* `ElfMetadata::new()` is non-root operation */
+        let _ = dbg!(ElfMetadata::new("..modules/mod.ko"));
+    }
+
+    #[test]
+    fn get_module_instance() {
+        /* `Module::init()` is non-root operation */
+        let _ = dbg!(Module::init("..modules/mod.ko"));
     }
 }

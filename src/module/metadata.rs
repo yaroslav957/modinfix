@@ -1,8 +1,10 @@
-use goblin::{elf::Elf, error::Result};
+use crate::error::Result;
+use goblin::elf::Elf;
 use std::{fs, path::Path};
 
 #[derive(Debug, Clone)]
-pub struct Metadata {
+#[non_exhaustive]
+pub struct ElfMetadata {
     pub comment_sec: Comment,
     pub mod_info_sec: ModInfo,
     pub debug_str_sec: DebugStr,
@@ -10,7 +12,7 @@ pub struct Metadata {
     pub debug_line_str_sec: DebugLine,
 }
 
-impl Metadata {
+impl ElfMetadata {
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
         let mod_data = fs::read(path)?;
         let elf = Elf::parse(&mod_data)?;
@@ -48,9 +50,9 @@ impl Metadata {
     }
 }
 
-#[doc = ".debug_line_str"]
 #[derive(Debug, Clone)]
 #[repr(transparent)]
+/// .debug_line_str metadata section
 pub struct DebugLine(String);
 
 impl DebugLine {
@@ -65,9 +67,9 @@ impl DebugLine {
     }
 }
 
-#[doc = ".debug_str"]
 #[derive(Debug, Clone)]
 #[repr(transparent)]
+/// .debug_str section metadata
 pub struct DebugStr(String);
 
 impl DebugStr {
@@ -82,9 +84,9 @@ impl DebugStr {
     }
 }
 
-#[doc = ".comment"]
 #[derive(Debug, Clone)]
 #[repr(transparent)]
+/// .comment section metadata
 pub struct Comment(String);
 
 impl Comment {
@@ -99,9 +101,9 @@ impl Comment {
     }
 }
 
-#[doc = ".note.Linux"]
 #[derive(Debug, Clone)]
 #[repr(transparent)]
+/// .note.Linux section metadata
 pub struct KernelNotes(String);
 
 impl KernelNotes {
@@ -116,9 +118,9 @@ impl KernelNotes {
     }
 }
 
-#[doc = ".modinfo"]
 #[derive(Debug, Clone)]
 #[repr(transparent)]
+/// .modinfo section metadata
 pub struct ModInfo(String);
 
 impl ModInfo {
