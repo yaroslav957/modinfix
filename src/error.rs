@@ -1,5 +1,5 @@
 use libc::{EBADF, EBADMSG, EBUSY, EEXIST, EFAULT, EFBIG, EINVAL, ENOEXEC, ENOKEY, ENOMEM, EPERM};
-use std::result;
+use std::{error, fmt, io, result};
 
 #[derive(Debug)]
 pub struct ModuleError(i32);
@@ -18,11 +18,62 @@ impl ModuleError {
     pub const FILE_TOO_LARGE: Self = Self(EFBIG);
 }
 
+impl fmt::Display for ModuleError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            EBADMSG => write!(f, "[modinfix] Invalid module signature format"),
+            EBUSY => write!(f, "[modinfix] Module busy or timeout resolving symbols"),
+            EFAULT => write!(f, "[modinfix] Invalid memory address"),
+            ENOKEY => write!(f, "[modinfix] Missing or invalid cryptographic key"),
+            ENOMEM => write!(f, "[modinfix] Out of memory"),
+            EPERM => write!(f, "[modinfix] Permission denied (CAP_SYS_MODULE required)"),
+            EEXIST => write!(f, "[modinfix] Module already loaded"),
+            EINVAL => write!(f, "[modinfix] Invalid parameters or ELF structure"),
+            ENOEXEC => write!(f, "[modinfix] Invalid ELF format or architecture mismatch"),
+            EBADF => write!(f, "[modinfix] Bad file descriptor"),
+            EFBIG => write!(f, "[modinfix] File too large"),
+            _ => write!(f, "[modinfix] Unknown module error (OS code: {})", self.0),
+        }
+    }
+}
+
+impl From<ModuleError> for Error {
+    fn from(e: ModuleError) -> Self {
+        Error::Module(e)
+    }
+}
+
+impl std::error::Error for ModuleError {} // <-- ? или нормальный импл сделать @Nano
+
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum Error {
     Module(ModuleError),
-    IO(std::io::Error),
+    IO(io::Error),
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            Error::Module(ref e) => write!(f, "[modinfix] Module error: {:?}", e),
+            Error::IO(ref e) => write!(f, "[modinfix] IO error: {}", e),
+        }
+    }
+}
+
+impl error::Error for Error {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+        match *self {
+            Error::Module(ref e) => Some(e),
+            Error::IO(ref e) => Some(e),
+        }
+    }
+}
+
+impl From<io::Error> for Error {
+    fn from(e: io::Error) -> Self {
+        Error::IO(e)
+    }
 }
 
 pub type Result<T> = result::Result<T, Error>;
