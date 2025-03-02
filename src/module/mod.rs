@@ -8,6 +8,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
+pub mod error;
 pub mod flags;
 pub mod metadata;
 pub mod params;
