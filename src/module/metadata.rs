@@ -16,7 +16,6 @@ impl ElfMetadata {
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
         let mod_data = fs::read(path)?;
         let elf = Elf::parse(&mod_data)?;
-
         let mut modinfo_data: &[u8] = &[];
         let mut kernel_notes_data: &[u8] = &[];
         let mut comment_data: &[u8] = &[];
