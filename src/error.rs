@@ -21,18 +21,18 @@ impl ModuleError {
 impl fmt::Display for ModuleError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
-            EBADMSG => write!(f, "[modinfix] Invalid module signature format"),
-            EBUSY => write!(f, "[modinfix] Module busy or timeout resolving symbols"),
-            EFAULT => write!(f, "[modinfix] Invalid memory address"),
-            ENOKEY => write!(f, "[modinfix] Missing or invalid cryptographic key"),
-            ENOMEM => write!(f, "[modinfix] Out of memory"),
-            EPERM => write!(f, "[modinfix] Permission denied (CAP_SYS_MODULE required)"),
-            EEXIST => write!(f, "[modinfix] Module already loaded"),
-            EINVAL => write!(f, "[modinfix] Invalid parameters or ELF structure"),
-            ENOEXEC => write!(f, "[modinfix] Invalid ELF format or architecture mismatch"),
-            EBADF => write!(f, "[modinfix] Bad file descriptor"),
-            EFBIG => write!(f, "[modinfix] File too large"),
-            _ => write!(f, "[modinfix] Unknown module error (OS code: {})", self.0),
+            EBADMSG => write!(f, "Invalid module signature format"),
+            EBUSY => write!(f, "Module busy or timeout resolving symbols"),
+            EFAULT => write!(f, "Invalid memory address"),
+            ENOKEY => write!(f, "Missing or invalid cryptographic key"),
+            ENOMEM => write!(f, "Out of memory"),
+            EPERM => write!(f, "Permission denied (CAP_SYS_MODULE required)"),
+            EEXIST => write!(f, "Module already loaded"),
+            EINVAL => write!(f, "Invalid parameters or ELF structure"),
+            ENOEXEC => write!(f, "Invalid ELF format or architecture mismatch"),
+            EBADF => write!(f, "Bad file descriptor"),
+            EFBIG => write!(f, "File too large"),
+            _ => write!(f, "Unknown module error (OS code: {})", self.0),
         }
     }
 }
