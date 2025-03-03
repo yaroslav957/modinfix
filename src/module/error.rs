@@ -5,6 +5,7 @@ use libc::{
 use std::{error, fmt};
 
 #[derive(Debug, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct ModuleError(i32);
 
 impl ModuleError {
@@ -25,20 +26,20 @@ impl ModuleError {
 
 impl fmt::Display for ModuleError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            EBADMSG => write!(f, "Invalid module signature"),
-            EBUSY => write!(f, "Module busy or timeout resolving symbols"),
-            EFAULT => write!(f, "Invalid memory address"),
-            ENOKEY => write!(f, "Missing or invalid crypto key"),
-            ENOMEM => write!(f, "Out of memory"),
-            EPERM => write!(f, "Permission denied (CAP_SYS_MODULE required)"),
-            EEXIST => write!(f, "Module already loaded"),
-            EINVAL => write!(f, "Invalid parameters or ELF structure"),
-            ENOEXEC => write!(f, "Invalid ELF format or architecture mismatch"),
-            EBADF => write!(f, "Bad file descriptor"),
-            EFBIG => write!(f, "File too large"),
-            ENOENT => write!(f, "Module not found"),
-            EWOULDBLOCK => write!(f, "Module has unresolved dependencies"),
+        match *self {
+            Self::INVALID_SIGNATURE => write!(f, "Invalid module signature"),
+            Self::BUSY_TIMEOUT => write!(f, "Module busy or timeout resolving symbols"),
+            Self::INVALID_ADDRESS => write!(f, "Invalid memory address"),
+            Self::BAD_CRYPTO_KEY => write!(f, "Missing or invalid crypto key"),
+            Self::OUT_OF_MEMORY => write!(f, "Out of memory"),
+            Self::PERMISSION_DENIED => write!(f, "Permission denied (CAP_SYS_MODULE required)"),
+            Self::ALREADY_LOADED => write!(f, "Module already loaded"),
+            Self::INVALID_PARAMETERS => write!(f, "Invalid parameters or ELF structure"),
+            Self::INVALID_EXECUTABLE => write!(f, "Invalid ELF format or architecture mismatch"),
+            Self::BAD_FILE_DESCRIPTOR => write!(f, "Bad file descriptor"),
+            Self::FILE_TOO_LARGE => write!(f, "File too large"),
+            Self::MODULE_NOT_FOUND => write!(f, "Module not found"),
+            Self::DEPENDENCIES_BLOCK => write!(f, "Module has unresolved dependencies"),
             _ => write!(f, "Unknown module error (OS code: {})", self.0),
         }
     }
