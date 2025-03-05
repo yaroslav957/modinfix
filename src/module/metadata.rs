@@ -1,3 +1,7 @@
+/*
+    !TODO!: fields validation + refactoring + optimizations
+*/
+
 use crate::error::Result;
 use goblin::elf::Elf;
 use std::{fs, path::Path};
@@ -13,7 +17,7 @@ pub struct ElfMetadata {
 }
 
 impl ElfMetadata {
-    pub fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
+    pub(crate) fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
         let mod_data = fs::read(path)?;
         let elf = Elf::parse(&mod_data)?;
         let mut modinfo_data: &[u8] = &[];

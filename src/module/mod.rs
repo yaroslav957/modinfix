@@ -1,3 +1,7 @@
+/*
+    !TODO!: refactoring + optimizations + load/unload funcs
+*/
+
 use crate::{
     error::Result,
     module::{metadata::ElfMetadata, params::Params},
@@ -13,7 +17,7 @@ pub mod flags;
 pub mod metadata;
 pub mod params;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Module {
     pub fd: i32,
     pub path: PathBuf,

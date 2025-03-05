@@ -1,3 +1,7 @@
+/*
+    !TODO!: delete shitty re + validation + refactoring
+*/
+
 use std::{ffi::CString, io::Error};
 
 #[repr(transparent)]
@@ -5,7 +9,7 @@ use std::{ffi::CString, io::Error};
 pub struct Params(CString);
 
 impl Params {
-    pub fn new(params: &[&str]) -> Result<Self, Error> {
-        Ok(Self(CString::new(params.join(" "))?))
+    pub fn new(params: &str) -> Result<Self, Error> {
+        Ok(Self(CString::new(params)?))
     }
 }
