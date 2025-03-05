@@ -22,22 +22,23 @@ impl ElfMetadata {
         let mut debug_str_data: &[u8] = &[];
         let mut debug_line_str_data: &[u8] = &[];
 
-        elf.section_headers
-            .iter()
-            .filter_map(|section| {
-                let name = elf.shdr_strtab.get_at(section.sh_name)?;
-                let data = &mod_data
-                    [section.sh_offset as usize..(section.sh_offset + section.sh_size) as usize];
-                Some((name, data))
-            })
-            .for_each(|(name, data)| match name {
+        for section in &elf.section_headers {
+            let Some(name) = elf.shdr_strtab.get_at(section.sh_name) else {
+                continue;
+            };
+
+            let data = &mod_data
+                [section.sh_offset as usize..(section.sh_offset + section.sh_size) as usize];
+
+            match name {
                 ".modinfo" => modinfo_data = data,
                 ".note.Linux" => kernel_notes_data = data,
                 ".comment" => comment_data = data,
                 ".debug_str" => debug_str_data = data,
                 ".debug_line_str" => debug_line_str_data = data,
                 _ => (), // until more sections
-            });
+            }
+        }
 
         Ok(Self {
             comment_sec: Comment::new(comment_data),

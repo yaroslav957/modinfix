@@ -4,8 +4,7 @@ use libc::{
 };
 use std::{error, fmt};
 
-#[derive(Debug, PartialEq, Eq)]
-#[repr(transparent)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ModuleError(i32);
 
 impl ModuleError {
@@ -40,7 +39,7 @@ impl fmt::Display for ModuleError {
             Self::FILE_TOO_LARGE => write!(f, "File too large"),
             Self::MODULE_NOT_FOUND => write!(f, "Module not found"),
             Self::DEPENDENCIES_BLOCK => write!(f, "Module has unresolved dependencies"),
-            _ => write!(f, "Unknown module error (OS code: {})", self.0),
+            Self(unknown) => write!(f, "Unknown module error (OS code: {unknown})"),
         }
     }
 }
