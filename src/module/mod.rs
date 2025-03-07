@@ -1,10 +1,15 @@
 /*
-    !TODO!: refactoring + optimizations + load/unload funcs
+    !TODO!: refactoring + optimizations + impl Drop for Module
 */
 
 use crate::{
-    error::Result,
-    module::{metadata::ElfMetadata, params::Params},
+    error::{Error, Result},
+    module::{
+        error::ModuleError,
+        flags::{LoadFlag, Syscall, UnloadFlag},
+        metadata::ElfMetadata,
+        params::Params,
+    },
 };
 use std::{
     fs::File,
@@ -33,5 +38,34 @@ impl Module {
             path: path.as_ref().to_path_buf(),
             params: Params::default(),
         })
+    }
+
+    pub fn fload(&self, flag: LoadFlag, params: Params) -> Result<()> {
+        // SAFETY: `FLOAD=0x139`, Valid fd (checks on `::init()` step), const load flag and valid *const i8=CString ptr (NonNul on `::init()` step)
+        let result =
+            unsafe { libc::syscall(Syscall::FLoad as i64, self.fd, flag, params.0.as_ptr()) };
+
+        if result < 0 {
+            Err(Error::from(ModuleError::from(
+                // SAFETY: Just trust me. (It's safe lol). TODO?: (rebase io::Error::last_os_error())
+                unsafe { *libc::__errno_location() },
+            )))
+        } else {
+            Ok(())
+        }
+    }
+
+    pub fn unload(&self, flag: UnloadFlag) -> Result<()> {
+        // SAFETY: `DELETE=0xB0`, Valid fd (checks on `::init()` step), const load flag
+        let result = unsafe { libc::syscall(Syscall::Delete as i64, self.fd, flag) };
+
+        if result < 0 {
+            Err(Error::from(ModuleError::from(
+                // SAFETY: Just trust me. (It's safe lol). TODO?: (rebase io::Error::last_os_error())
+                unsafe { *libc::__errno_location() },
+            )))
+        } else {
+            Ok(())
+        }
     }
 }

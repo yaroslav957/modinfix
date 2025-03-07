@@ -4,7 +4,7 @@ use libc::{
 };
 use std::{error, fmt};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ModuleError(i32);
 
 impl ModuleError {
@@ -21,6 +21,27 @@ impl ModuleError {
     pub const FILE_TOO_LARGE: Self = Self(EFBIG);
     pub const MODULE_NOT_FOUND: Self = Self(ENOENT);
     pub const DEPENDENCIES_BLOCK: Self = Self(EWOULDBLOCK);
+}
+
+impl fmt::Debug for ModuleError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            Self::INVALID_SIGNATURE => write!(f, "EBADMSG"),
+            Self::BUSY_TIMEOUT => write!(f, "EBUSY"),
+            Self::INVALID_ADDRESS => write!(f, "EFAULT"),
+            Self::BAD_CRYPTO_KEY => write!(f, "ENOKEY"),
+            Self::OUT_OF_MEMORY => write!(f, "ENOMEM"),
+            Self::PERMISSION_DENIED => write!(f, "EPERM"),
+            Self::ALREADY_LOADED => write!(f, "EEXIST"),
+            Self::INVALID_PARAMETERS => write!(f, "EINVAL"),
+            Self::INVALID_EXECUTABLE => write!(f, "ENOEXEC"),
+            Self::BAD_FILE_DESCRIPTOR => write!(f, "EBADF"),
+            Self::FILE_TOO_LARGE => write!(f, "EFBIG"),
+            Self::MODULE_NOT_FOUND => write!(f, "ENOENT"),
+            Self::DEPENDENCIES_BLOCK => write!(f, "EWOULDBLOCK"),
+            Self(unknown) => write!(f, "{unknown}"),
+        }
+    }
 }
 
 impl fmt::Display for ModuleError {
@@ -41,6 +62,12 @@ impl fmt::Display for ModuleError {
             Self::DEPENDENCIES_BLOCK => write!(f, "Module has unresolved dependencies"),
             Self(unknown) => write!(f, "Unknown module error (OS code: {unknown})"),
         }
+    }
+}
+
+impl From<i32> for ModuleError {
+    fn from(err: i32) -> Self {
+        Self(err)
     }
 }
 

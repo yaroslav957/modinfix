@@ -9,11 +9,11 @@ use std::{fs, path::Path};
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub struct ElfMetadata {
-    pub comment_sec: Comment,
-    pub mod_info_sec: ModInfo,
-    pub debug_str_sec: DebugStr,
-    pub kernel_notes_sec: KernelNotes,
-    pub debug_line_str_sec: DebugLine,
+    pub comment_section: Comment,
+    pub modinfo_section: ModInfo,
+    pub debugstr_section: DebugStr,
+    pub kernelnotes_section: KernelNotes,
+    pub debuglinestr_section: DebugLine,
 }
 
 impl ElfMetadata {
@@ -21,35 +21,34 @@ impl ElfMetadata {
         let mod_data = fs::read(path)?;
         let elf = Elf::parse(&mod_data)?;
         let mut modinfo_data: &[u8] = &[];
-        let mut kernel_notes_data: &[u8] = &[];
+        let mut kernelnotes_data: &[u8] = &[];
         let mut comment_data: &[u8] = &[];
-        let mut debug_str_data: &[u8] = &[];
-        let mut debug_line_str_data: &[u8] = &[];
+        let mut debugstr_data: &[u8] = &[];
+        let mut debuglinestr_data: &[u8] = &[];
 
         for section in &elf.section_headers {
             let Some(name) = elf.shdr_strtab.get_at(section.sh_name) else {
                 continue;
             };
-
             let data = &mod_data
                 [section.sh_offset as usize..(section.sh_offset + section.sh_size) as usize];
 
             match name {
                 ".modinfo" => modinfo_data = data,
-                ".note.Linux" => kernel_notes_data = data,
+                ".note.Linux" => kernelnotes_data = data,
                 ".comment" => comment_data = data,
-                ".debug_str" => debug_str_data = data,
-                ".debug_line_str" => debug_line_str_data = data,
+                ".debug_str" => debugstr_data = data,
+                ".debug_line_str" => debuglinestr_data = data,
                 _ => (), // until more sections
             }
         }
 
         Ok(Self {
-            comment_sec: Comment::new(comment_data),
-            mod_info_sec: ModInfo::new(modinfo_data),
-            debug_str_sec: DebugStr::new(debug_str_data),
-            kernel_notes_sec: KernelNotes::new(kernel_notes_data),
-            debug_line_str_sec: DebugLine::new(debug_line_str_data),
+            comment_section: Comment::new(comment_data),
+            modinfo_section: ModInfo::new(modinfo_data),
+            debugstr_section: DebugStr::new(debugstr_data),
+            kernelnotes_section: KernelNotes::new(kernelnotes_data),
+            debuglinestr_section: DebugLine::new(debuglinestr_data),
         })
     }
 }

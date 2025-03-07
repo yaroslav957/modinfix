@@ -1,18 +1,26 @@
 use crate::module::error::ModuleError;
 use std::{error, fmt, io, result};
 
-#[derive(Debug)]
 #[non_exhaustive]
 pub enum Error {
     Module(ModuleError),
     IO(io::Error),
 }
 
+impl fmt::Debug for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            Error::Module(ref e) => write!(f, "[modinfix] Module error: {}", e),
+            Error::IO(ref e) => write!(f, "[modinfix] IO error: {}", e),
+        }
+    }
+}
+
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
-            Error::Module(ref e) => write!(f, "[modinfix] Module error: {:?}", e),
-            Error::IO(ref e) => write!(f, "[modinfix] IO error: {}", e),
+            Error::Module(ref e) => write!(f, "Module error: {}", e),
+            Error::IO(ref e) => write!(f, "IO error: {}", e),
         }
     }
 }
