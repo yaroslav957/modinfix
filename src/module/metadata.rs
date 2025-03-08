@@ -1,5 +1,5 @@
 /*
-    !TODO!: fields validation + refactoring + optimizations
+    !TODO!: fields validation (later) + optimizations (mmap instead of `fs::read()`)
 */
 
 use crate::error::Result;
@@ -16,39 +16,34 @@ pub struct ElfMetadata {
     pub debuglinestr_section: DebugLine,
 }
 
+use std::collections::HashMap;
+
 impl ElfMetadata {
     pub(crate) fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
         let mod_data = fs::read(path)?;
         let elf = Elf::parse(&mod_data)?;
-        let mut modinfo_data: &[u8] = &[];
-        let mut kernelnotes_data: &[u8] = &[];
-        let mut comment_data: &[u8] = &[];
-        let mut debugstr_data: &[u8] = &[];
-        let mut debuglinestr_data: &[u8] = &[];
+        let mut sections = HashMap::new();
 
         for section in &elf.section_headers {
-            let Some(name) = elf.shdr_strtab.get_at(section.sh_name) else {
-                continue;
-            };
-            let data = &mod_data
-                [section.sh_offset as usize..(section.sh_offset + section.sh_size) as usize];
-
-            match name {
-                ".modinfo" => modinfo_data = data,
-                ".note.Linux" => kernelnotes_data = data,
-                ".comment" => comment_data = data,
-                ".debug_str" => debugstr_data = data,
-                ".debug_line_str" => debuglinestr_data = data,
-                _ => (), // until more sections
+            if let Some(name) = elf.shdr_strtab.get_at(section.sh_name) {
+                let data = &mod_data
+                    [section.sh_offset as usize..(section.sh_offset + section.sh_size) as usize];
+                sections.insert(name, data);
             }
         }
 
         Ok(Self {
-            comment_section: Comment::new(comment_data),
-            modinfo_section: ModInfo::new(modinfo_data),
-            debugstr_section: DebugStr::new(debugstr_data),
-            kernelnotes_section: KernelNotes::new(kernelnotes_data),
-            debuglinestr_section: DebugLine::new(debuglinestr_data),
+            comment_section: Comment::new(sections.get(".comment").copied().unwrap_or_default()),
+            modinfo_section: ModInfo::new(sections.get(".modinfo").copied().unwrap_or_default()),
+            debugstr_section: DebugStr::new(
+                sections.get(".debug_str").copied().unwrap_or_default(),
+            ),
+            kernelnotes_section: KernelNotes::new(
+                sections.get(".note.Linux").copied().unwrap_or_default(),
+            ),
+            debuglinestr_section: DebugLine::new(
+                sections.get(".debug_line_str").copied().unwrap_or_default(),
+            ),
         })
     }
 }

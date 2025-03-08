@@ -12,8 +12,8 @@ mod tests {
         `Module::init(...)` is non-root operation,
         creating the mod instance with metadata included
         */
-        let module = Module::init("../mod.ko")?;
-        let metadata = module.metadata.comment_section;
+        let module = Module::init("/home/yaroslav/Проекты/modinfix/modules/moduls/mod.ko")?;
+        let metadata = &module.metadata.comment_section;
 
         println!("{:?}", metadata);
         Ok(())
@@ -21,7 +21,7 @@ mod tests {
 
     #[test]
     fn load_module() -> Result<()> {
-        let module = Module::init("../mod.ko")?;
+        let mut module = Module::init("/home/yaroslav/Проекты/modinfix/modules/moduls/mod.ko")?;
         /*
         `Module::fload(...)` is root operation,
         loading the mod instance into kernel space
