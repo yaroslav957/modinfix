@@ -13,7 +13,7 @@ mod tests {
         creating the mod instance with metadata included
         */
         let module = Module::init("/home/yaroslav/Проекты/modinfix/modules/moduls/mod.ko")?;
-        let metadata = &module.metadata.comment_section;
+        let metadata = &module.modinfo;
 
         println!("{:?}", metadata);
         Ok(())

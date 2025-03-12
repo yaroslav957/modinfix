@@ -7,7 +7,7 @@ use crate::{
     module::{
         error::ModuleError,
         flags::{LoadFlag, Syscall, UnloadFlag},
-        metadata::ElfMetadata,
+        info::ModInfo,
         params::Params,
     },
 };
@@ -19,26 +19,26 @@ use std::{
 
 pub mod error;
 pub mod flags;
-pub mod metadata;
+pub mod info;
 pub mod params;
 
 #[derive(Debug, Clone)]
-pub struct Module {
+pub struct Module<'m> {
     pub fd: i32,
     pub path: PathBuf,
-    pub metadata: ElfMetadata,
+    pub modinfo: ModInfo<'m>,
     pub params: Params,
     pub(crate) loaded: bool,
 }
 
-impl Module {
+impl<'m> Module<'m> {
     pub fn init<P: AsRef<Path>>(path: P) -> Result<Self> {
         Ok(Self {
             fd: File::open(&path)?.as_raw_fd(),
-            metadata: ElfMetadata::new(&path)?,
+            modinfo: ModInfo::new(&path)?,
             path: path.as_ref().to_path_buf(),
             params: Params::default(),
-            loaded: false,
+            loaded: bool::default(),
         })
     }
 
@@ -78,7 +78,7 @@ impl Module {
     }
 }
 
-impl Drop for Module {
+impl<'m> Drop for Module<'m> {
     fn drop(&mut self) {
         if self.loaded {
             _ = self.unload(UnloadFlag::NONE);
