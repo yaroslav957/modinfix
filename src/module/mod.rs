@@ -11,11 +11,7 @@ use crate::{
         params::Params,
     },
 };
-use std::{
-    fs::File,
-    os::fd::AsRawFd,
-    path::{Path, PathBuf},
-};
+use std::{fs::File, os::fd::AsRawFd, path::Path};
 
 pub mod error;
 pub mod flags;
@@ -23,20 +19,18 @@ pub mod info;
 pub mod params;
 
 #[derive(Debug, Clone)]
-pub struct Module<'m> {
+pub struct Module {
     pub fd: i32,
-    pub path: PathBuf,
-    pub modinfo: ModInfo<'m>,
+    pub modinfo: ModInfo,
     pub params: Params,
     pub(crate) loaded: bool,
 }
 
-impl<'m> Module<'m> {
+impl Module {
     pub fn init<P: AsRef<Path>>(path: P) -> Result<Self> {
         Ok(Self {
             fd: File::open(&path)?.as_raw_fd(),
             modinfo: ModInfo::new(&path)?,
-            path: path.as_ref().to_path_buf(),
             params: Params::default(),
             loaded: bool::default(),
         })
@@ -78,7 +72,7 @@ impl<'m> Module<'m> {
     }
 }
 
-impl<'m> Drop for Module<'m> {
+impl Drop for Module {
     fn drop(&mut self) {
         if self.loaded {
             _ = self.unload(UnloadFlag::NONE);
