@@ -1,0 +1,10 @@
+[package]
+name = "modinfix"
+version = "0.0.1"
+edition = "2024"
+repository = "https://github.com/yaroslav957/modinfix"
+
+[dependencies]
+libc = "=0.2.170"
+goblin = "=0.9.3"
+bitflags = "=2.9.0"
